@@ -5,6 +5,7 @@ import { config } from './config/env.js'
 import { getMe } from './controllers/authController.js'
 import { requireAuth } from './middleware/authMiddleware.js'
 import { authRouter } from './routes/authRoutes.js'
+import { profileRouter } from './routes/profileRoutes.js'
 
 export const app = express()
 
@@ -25,6 +26,9 @@ app.get('/health', (_req, res) => {
 
 // Auth routes (/auth/register, /auth/login, /auth/logout, /auth/me)
 app.use('/auth', authRouter)
+
+// Profile routes (/profile, /profile/skills, /profile/experience, /profile/onboarding/complete)
+app.use('/profile', profileRouter)
 
 // Direct /me route support matching root specification
 app.get('/me', requireAuth, getMe)

@@ -8,13 +8,14 @@ generator client {
 }
 
 model User {
-  id           String    @id @default(cuid())
+  id           String          @id @default(cuid())
   name         String
-  email        String    @unique
+  email        String          @unique
   passwordHash String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
   sessions     Session[]
+  profile      StudentProfile?
 }
 
 model Session {
@@ -24,4 +25,69 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model StudentProfile {
+  id                    String              @id @default(cuid())
+  userId                String              @unique
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  isOnboardingCompleted Boolean             @default(false)
+  currentStep           Int                 @default(1)
+  completedAt           DateTime?
+
+  // Step 2: Education
+  degree                String?
+  branch                String?
+  currentYear           String?
+  university            String?
+  college               String?
+  cgpa                  Float?
+  academicContext       String?
+
+  // Step 5: Interests (stored as JSON array string)
+  interests             String?
+
+  // Step 6: Goals
+  primaryGoal           String?
+  secondaryGoals        String?             // JSON array string
+
+  // Step 7: Constraints
+  preferredLocation     String?
+  workMode              String?
+  weeklyHours           String?
+  targetTimeline        String?
+  financialContext      String?
+
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  skills                ProfileSkill[]
+  experiences           ProfileExperience[]
+}
+
+model ProfileSkill {
+  id          String         @id @default(cuid())
+  profileId   String
+  profile     StudentProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name        String
+  proficiency String         @default("Intermediate") // Beginner | Intermediate | Advanced
+  createdAt   DateTime       @default(now())
+
+  @@unique([profileId, name])
+}
+
+model ProfileExperience {
+  id           String         @id @default(cuid())
+  profileId    String
+  profile      StudentProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  type         String         // internship | project | freelance | competition | certification | open_source | other
+  title        String
+  organization String?
+  description  String?
+  startDate    String?
+  endDate      String?
+  link         String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }

@@ -64,6 +64,63 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 }
 
+export interface ProfileSkill {
+  id?: string
+  name: string
+  proficiency: 'Beginner' | 'Intermediate' | 'Advanced'
+}
+
+export type ExperienceType =
+  | 'internship'
+  | 'project'
+  | 'freelance'
+  | 'competition'
+  | 'certification'
+  | 'open_source'
+  | 'other'
+
+export interface ProfileExperience {
+  id?: string
+  type: ExperienceType
+  title: string
+  organization?: string | null
+  description?: string | null
+  startDate?: string | null
+  endDate?: string | null
+  link?: string | null
+}
+
+export interface StudentProfile {
+  id?: string
+  userId?: string
+  isOnboardingCompleted: boolean
+  currentStep: number
+  completedAt?: string | null
+  degree?: string | null
+  branch?: string | null
+  currentYear?: string | null
+  university?: string | null
+  college?: string | null
+  cgpa?: number | null
+  academicContext?: string | null
+  interests: string[]
+  primaryGoal?: string | null
+  secondaryGoals: string[]
+  preferredLocation?: string | null
+  workMode?: string | null
+  weeklyHours?: string | null
+  targetTimeline?: string | null
+  financialContext?: string | null
+  skills: ProfileSkill[]
+  experiences: ProfileExperience[]
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface ProfileResponse {
+  profile: StudentProfile | null
+}
+
 export const api = {
   register: (data: { name: string; email: string; password: string }) =>
     request<AuthResponse>('/auth/register', {
@@ -83,4 +140,29 @@ export const api = {
     }),
 
   getMe: () => request<AuthResponse>('/auth/me'),
+
+  getProfile: () => request<ProfileResponse>('/profile'),
+
+  updateProfile: (data: Partial<StudentProfile>) =>
+    request<{ profile: StudentProfile }>('/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  updateSkills: (skills: ProfileSkill[]) =>
+    request<{ skills: ProfileSkill[] }>('/profile/skills', {
+      method: 'PUT',
+      body: JSON.stringify({ skills }),
+    }),
+
+  updateExperiences: (experiences: ProfileExperience[]) =>
+    request<{ experiences: ProfileExperience[] }>('/profile/experience', {
+      method: 'PUT',
+      body: JSON.stringify({ experiences }),
+    }),
+
+  completeOnboarding: () =>
+    request<{ message: string; profile: StudentProfile }>('/profile/onboarding/complete', {
+      method: 'PUT',
+    }),
 }
