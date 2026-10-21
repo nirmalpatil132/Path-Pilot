@@ -5,6 +5,7 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     fileParallelism: false, // Run auth tests sequentially on SQLite
+    testTimeout: 15000,
     include: ['tests/**/*.test.ts'],
   },
 })

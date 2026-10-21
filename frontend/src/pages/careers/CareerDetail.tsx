@@ -10,15 +10,30 @@ import {
 } from '@/components/ui'
 import { PublicNavbar } from '@/components/landing/PublicNavbar'
 import { Footer } from '@/components/landing/Footer'
-import { api, type CareerDetail as CareerDetailType } from '@/lib/api'
+import { useAuth } from '@/context'
+import {
+  api,
+  type CareerDetail as CareerDetailType,
+  type CareerFitDetailResponse,
+} from '@/lib/api'
 import { getCategoryBadgeVariant } from './categoryBadge'
+import { FitScoreBadge } from '@/components/careerFit/FitScoreBadge'
+import { DimensionBreakdown } from '@/components/careerFit/DimensionBreakdown'
+import { SkillGapMatrix } from '@/components/careerFit/SkillGapMatrix'
 
 export default function CareerDetail() {
   const { slug } = useParams<{ slug: string }>()
+  const { user } = useAuth()
+
   const [career, setCareer] = useState<CareerDetailType | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isNotFound, setIsNotFound] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  // Phase 6: Personalized Fit Analysis State
+  const [fitData, setFitData] = useState<CareerFitDetailResponse | null>(null)
+  const [isLoadingFit, setIsLoadingFit] = useState<boolean>(false)
+  const [fitLoadError, setFitLoadError] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -46,6 +61,26 @@ export default function CareerDetail() {
           setIsLoading(false)
         }
       }
+
+      // If user is authenticated, also load personalized career fit & skill gaps
+      if (user) {
+        setIsLoadingFit(true)
+        setFitLoadError(null)
+        try {
+          const fitRes = await api.getCareerFitForSlug(careerSlug)
+          if (isMounted) {
+            setFitData(fitRes)
+          }
+        } catch (err: unknown) {
+          if (isMounted) {
+            setFitLoadError(err instanceof Error ? err.message : 'Failed to evaluate personalized fit')
+          }
+        } finally {
+          if (isMounted) {
+            setIsLoadingFit(false)
+          }
+        }
+      }
     }
 
     if (slug) {
@@ -55,7 +90,7 @@ export default function CareerDetail() {
     return () => {
       isMounted = false
     }
-  }, [slug])
+  }, [slug, user])
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -125,6 +160,151 @@ export default function CareerDetail() {
                 {career.summary}
               </p>
             </div>
+
+            {/* ========================================================= */}
+            {/* PHASE 6: PERSONALIZED FIT & SKILL-GAP ENGINE SECTION      */}
+            {/* ========================================================= */}
+            <section aria-labelledby="personalized-fit-heading" className="space-y-6">
+              {!user ? (
+                /* Unauthenticated Prompt */
+                <Card className="border-primary/30 bg-primary/5">
+                  <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <Badge variant="primary" className="mb-2">Personalized Fit</Badge>
+                      <h2 className="text-h3 font-bold text-text-primary">
+                        Want to see your fit score for {career.title}?
+                      </h2>
+                      <p className="mt-1 text-body-sm text-text-secondary">
+                        Sign in or register to view your deterministic fit score, matched profile evidence, and prioritized skill-gap breakdown.
+                      </p>
+                    </div>
+                    <div className="flex gap-3 shrink-0">
+                      <Link to="/login">
+                        <Button variant="secondary" size="md">
+                          Log In
+                        </Button>
+                      </Link>
+                      <Link to="/register">
+                        <Button size="md">
+                          Create Free Account
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : isLoadingFit ? (
+                /* Loading Fit */
+                <Card>
+                  <CardContent className="p-8 text-center flex flex-col items-center gap-3">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    <p className="text-body-sm text-text-secondary">
+                      Evaluating your profile against {career.title} requirements...
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : fitLoadError ? (
+                <Card className="border-danger/30 bg-danger/5">
+                  <CardContent className="p-6 text-center space-y-2">
+                    <p className="text-body-sm font-semibold text-danger-strong">{fitLoadError}</p>
+                    <p className="text-caption text-text-secondary">Unable to calculate fit score right now.</p>
+                  </CardContent>
+                </Card>
+              ) : fitData && !fitData.hasProfile ? (
+                /* Authenticated but no profile yet */
+                <Card className="border-warning/30 bg-warning/5">
+                  <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <Badge variant="warning" className="mb-2">Profile Required</Badge>
+                      <h2 className="text-h3 font-bold text-text-primary">
+                        Complete Your Profile to Calculate Career Fit
+                      </h2>
+                      <p className="mt-1 text-body-sm text-text-secondary">
+                        Add your educational background and technical skills to see personalized alignment and 3-category skill gaps for {career.title}.
+                      </p>
+                    </div>
+                    <Link to="/onboarding" className="shrink-0">
+                      <Button size="md">
+                        Complete Profile Setup →
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ) : fitData?.fit ? (
+                /* Authenticated and Fit Evaluated */
+                <Card className="border-border bg-surface" data-testid="career-fit-deepdive-card">
+                  <CardHeader className="border-b border-border p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="default">Personalized Career Fit</Badge>
+                          <span className="text-caption text-text-muted">
+                            Policy v{fitData.fit.policyVersion}
+                          </span>
+                        </div>
+                        <h2 id="personalized-fit-heading" className="mt-2 text-h2 font-bold text-text-primary">
+                          Your Alignment with {career.title}
+                        </h2>
+                        <p className="mt-1 text-body-sm text-text-secondary">
+                          Deterministic calculation based on your authenticated student profile.
+                        </p>
+                      </div>
+                      <div className="shrink-0 sm:text-right">
+                        <FitScoreBadge fit={fitData.fit} size="lg" showBar={true} />
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="p-6 space-y-8">
+                    {/* Strengths & Areas for Development */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {fitData.fit.strengths.length > 0 && (
+                        <div className="rounded-lg border border-success/30 bg-success/5 p-4 space-y-2">
+                          <h4 className="text-body font-semibold text-success-strong">
+                            ✓ Key Profile Strengths
+                          </h4>
+                          <ul className="space-y-1.5 text-body-sm text-text-secondary">
+                            {fitData.fit.strengths.map((st, idx) => (
+                              <li key={idx}>• {st}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {fitData.fit.growthAreas.length > 0 && (
+                        <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 space-y-2">
+                          <h4 className="text-body font-semibold text-warning-strong">
+                            ↗ Areas for Development
+                          </h4>
+                          <ul className="space-y-1.5 text-body-sm text-text-secondary">
+                            {fitData.fit.growthAreas.map((ga, idx) => (
+                              <li key={idx}>• {ga}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 4 Dimension Explainable Breakdown */}
+                    <DimensionBreakdown fit={fitData.fit} />
+
+                    {/* 3-Category Skill Gap Matrix */}
+                    {fitData.fit.skillGapAnalysis && (
+                      <div className="pt-6 border-t border-border">
+                        <div className="mb-4">
+                          <h3 className="text-h3 font-semibold text-text-primary">
+                            Prioritized Skill-Gap Matrix
+                          </h3>
+                          <p className="mt-1 text-body-sm text-text-secondary">
+                            Gaps categorized into Critical Missing, Recommended Next, and Optional Advantage according to the catalog hierarchy.
+                          </p>
+                        </div>
+                        <SkillGapMatrix analysis={fitData.fit.skillGapAnalysis} />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : null}
+            </section>
 
             {/* Section 1: Role Overview & Work Description */}
             <section aria-labelledby="about-role-heading">
@@ -399,18 +579,6 @@ export default function CareerDetail() {
                 </Card>
               </section>
             )}
-
-            {/* Phase Disclaimer */}
-            <div className="rounded-lg border border-dashed border-border bg-surface-muted/30 p-6 text-center">
-              <h3 className="text-body font-semibold text-text-primary">
-                Next in Phase 6: Deterministic Career-Fit &amp; Skill-Gap Engine
-              </h3>
-              <p className="mt-1 text-body-sm text-text-secondary max-w-xl mx-auto">
-                In Phase 6, PathPilot will evaluate your active student profile against these required
-                skills to compute honest skill matches, highlight missing competencies, and recommend
-                prioritized actions.
-              </p>
-            </div>
           </div>
         ) : null}
       </main>

@@ -180,6 +180,112 @@ export interface CareerDetailResponse {
   career: CareerDetail
 }
 
+export interface DimensionScoreDetail {
+  score: number
+  rawScore: number
+  configuredWeight: number
+  effectiveWeight: number
+  isAvailable: boolean
+  explanation: string
+  evidence: string[]
+}
+
+export type SkillGapCategory = 'CRITICAL_MISSING' | 'RECOMMENDED_NEXT' | 'OPTIONAL_ADVANTAGE'
+
+export interface SkillGapItem {
+  id: string
+  name: string
+  category: SkillGapCategory
+  categoryLabel: 'Critical Missing' | 'Recommended Next' | 'Optional Advantage'
+  description?: string | null
+  classificationRule: string
+  targetCareerSlug: string
+}
+
+export interface SkillGapAnalysis {
+  careerSlug: string
+  careerTitle: string
+  totalCoreSkills: number
+  matchedCoreSkills: string[]
+  missingCoreSkills: string[]
+  coreCoveragePercentage: number
+  totalSupportingSkills: number
+  matchedSupportingSkills: string[]
+  missingSupportingSkills: string[]
+  allMatchedSkills: string[]
+  matchedSkills: string[]
+  criticalMissingCount: number
+  recommendedNextCount: number
+  optionalAdvantageCount: number
+  gaps: SkillGapItem[]
+}
+
+export interface CareerFitResult {
+  careerId: string
+  slug: string
+  title: string
+  category: string
+  fitScore: number
+  scoreDisplay: number | null
+  fitLevel: 'Strong Match' | 'Moderate Match' | 'Developing Fit' | 'Insufficient Data'
+  status: 'SUFFICIENT_EVIDENCE' | 'INSUFFICIENT_DATA'
+  statusReason?: string
+  policyVersion: string
+  configuredWeights: {
+    skills: number
+    projects: number
+    interests: number
+    academics: number
+  }
+  effectiveWeights: Record<string, number>
+  availableDimensions: string[]
+  excludedDimensions: Array<{ dimension: string; reason: string }>
+  dimensionScores: {
+    skills: DimensionScoreDetail
+    projects: DimensionScoreDetail
+    interests: DimensionScoreDetail
+    academics: DimensionScoreDetail
+  }
+  strengths: string[]
+  growthAreas: string[]
+  dataLimitations: string[]
+  matchedSkills: string[]
+  missingCoreCount: number
+  coreCoveragePercentage: number
+  skillGapAnalysis: SkillGapAnalysis
+}
+
+export interface CareerFitOverviewResponse {
+  status: 'SUFFICIENT_EVIDENCE' | 'INSUFFICIENT_DATA'
+  policyVersion: string
+  profileSummary: {
+    hasProfile: boolean
+    isOnboardingCompleted: boolean
+    skillsCount: number
+    experiencesCount: number
+    interestsCount: number
+  }
+  results: CareerFitResult[]
+  fits: CareerFitResult[]
+  message?: string
+}
+
+export interface CareerFitDetailResponse {
+  careerNotFound: boolean
+  hasProfile: boolean
+  career?: CareerDetail
+  fit: CareerFitResult | null
+  skillGaps?: SkillGapAnalysis | null
+  profileSummary?: {
+    hasProfile: boolean
+    isOnboardingCompleted: boolean
+    skillsCount: number
+    experiencesCount: number
+    interestsCount: number
+  }
+  message?: string
+}
+
 export const api = {
   register: (data: { name: string; email: string; password: string }) =>
     request<AuthResponse>('/auth/register', {
@@ -239,4 +345,10 @@ export const api = {
 
   getCareerBySlug: (slug: string) =>
     request<CareerDetailResponse>(`/careers/${encodeURIComponent(slug)}`),
+
+  getCareerFitOverview: () =>
+    request<CareerFitOverviewResponse>('/careers/fit'),
+
+  getCareerFitForSlug: (slug: string) =>
+    request<CareerFitDetailResponse>(`/careers/${encodeURIComponent(slug)}/fit`),
 }
