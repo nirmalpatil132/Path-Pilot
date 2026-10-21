@@ -11,6 +11,7 @@ import CareerExplorer from './pages/careers/CareerExplorer'
 import StyleGuide from './pages/dev/StyleGuide'
 import Landing from './pages/Landing'
 import OnboardingWizard from './pages/onboarding/OnboardingWizard'
+import RoadmapPage from './pages/roadmap/RoadmapPage'
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         {/* Protected routes (require valid authentication session) */}
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<AppCheckpoint />} />
+          <Route path="/roadmap" element={<RoadmapPage />} />
           <Route path="/onboarding" element={<OnboardingWizard />} />
         </Route>
       </Routes>

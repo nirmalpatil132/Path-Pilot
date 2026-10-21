@@ -134,6 +134,8 @@ export interface CareerSummary {
   exampleProjectsCount: number
 }
 
+export type CareerListItem = CareerSummary
+
 export interface CareerSkillItem {
   name: string
   description?: string | null
@@ -351,4 +353,114 @@ export const api = {
 
   getCareerFitForSlug: (slug: string) =>
     request<CareerFitDetailResponse>(`/careers/${encodeURIComponent(slug)}/fit`),
+
+  // Phase 7: Personalized Learning Roadmap API
+  generateRoadmap: (data: { careerSlug: string; weeklyHours?: number; force?: boolean }) =>
+    request<{ message: string; roadmap: Roadmap }>('/roadmap/generate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getCurrentRoadmap: () =>
+    request<CurrentRoadmapResponse>('/roadmap/current'),
+
+  getRoadmapById: (id: string) =>
+    request<{ roadmap: Roadmap }>(`/roadmap/${encodeURIComponent(id)}`),
+
+  updateTaskStatus: (
+    taskId: string,
+    data: { status?: RoadmapTaskStatus; notes?: string },
+  ) =>
+    request<{
+      message: string
+      task: RoadmapTask
+      roadmapProgress: {
+        totalTasks: number
+        completedTasks: number
+        inProgressTasks: number
+        blockedTasks: number
+        progressPercentage: number
+      }
+    }>(`/roadmap/tasks/${encodeURIComponent(taskId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  regenerateRoadmap: (data: {
+    careerSlug: string
+    weeklyHours?: number
+    preserveCompletedTasks?: boolean
+  }) =>
+    request<{ message: string; roadmap: Roadmap }>('/roadmap/regenerate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+}
+
+export type RoadmapTaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'BLOCKED'
+
+export interface RoadmapTask {
+  id: string
+  roadmapId: string
+  weekNumber: number
+  dayNumber: number
+  dayRange: string
+  orderIndex: number
+  title: string
+  description: string
+  estimatedMinutes: number
+  skillName: string
+  skillCategory: 'CRITICAL_MISSING' | 'RECOMMENDED_NEXT' | 'OPTIONAL_ADVANTAGE' | 'PROJECT'
+  prerequisites: string[]
+  completionCriteria: string
+  expectedOutput: string
+  status: RoadmapTaskStatus
+  notes?: string | null
+  completedAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface RoadmapWeek {
+  weekNumber: number
+  title: string
+  objective: string
+  milestoneOutcome: string
+  dayRange: string
+  tasks: RoadmapTask[]
+  totalTasks: number
+  completedTasks: number
+  progressPercentage: number
+  totalMinutes: number
+}
+
+export interface Roadmap {
+  id: string
+  userId: string
+  careerId: string
+  careerSlug: string
+  careerTitle: string
+  careerCategory?: string | null
+  careerSummary?: string | null
+  version: number
+  status: 'ACTIVE' | 'ARCHIVED'
+  weeklyHoursAssumed: number
+  totalDays: number
+  totalTasks: number
+  completedTasks: number
+  inProgressTasks: number
+  blockedTasks: number
+  progressPercentage: number
+  skillGapsAddressed: string[]
+  assumptions: string[]
+  deferredSkills: string[]
+  createdAt: string
+  updatedAt: string
+  weeks: RoadmapWeek[]
+  tasks: RoadmapTask[]
+}
+
+export interface CurrentRoadmapResponse {
+  hasRoadmap: boolean
+  roadmap: Roadmap | null
 }

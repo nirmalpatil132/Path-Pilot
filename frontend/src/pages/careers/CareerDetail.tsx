@@ -299,6 +299,23 @@ export default function CareerDetail() {
                           </p>
                         </div>
                         <SkillGapMatrix analysis={fitData.fit.skillGapAnalysis} />
+
+                        {/* Phase 7: Roadmap Action CTA */}
+                        <div className="mt-6 pt-5 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-surface-muted/40 p-4 rounded-xl border border-border/50">
+                          <div>
+                            <h4 className="text-body font-semibold text-text-primary">
+                              Ready to bridge your skill gaps for {career.title}?
+                            </h4>
+                            <p className="text-body-sm text-text-secondary mt-0.5">
+                              Generate a personalized, 30-day learning roadmap prioritized from your verified gaps.
+                            </p>
+                          </div>
+                          <Link to={`/roadmap?career=${career.slug}`} className="shrink-0">
+                            <Button size="md">
+                              Generate 30-Day Roadmap →
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     )}
                   </CardContent>

@@ -5,6 +5,7 @@ import { useAuth } from '@/context'
 import {
   api,
   type CareerFitOverviewResponse,
+  type Roadmap,
   type StudentProfile,
 } from '@/lib/api'
 import { GOALS, INTEREST_AREAS } from '../onboarding/constants'
@@ -23,6 +24,9 @@ export default function AppCheckpoint() {
   const [isLoadingFits, setIsLoadingFits] = useState(false)
   const [fitError, setFitError] = useState<string | null>(null)
   const [showAllFits, setShowAllFits] = useState(false)
+
+  // Phase 7: Roadmap State
+  const [activeRoadmap, setActiveRoadmap] = useState<Roadmap | null>(null)
 
   const loadProfile = useCallback(async () => {
     try {
@@ -48,10 +52,22 @@ export default function AppCheckpoint() {
     }
   }, [])
 
+  const loadRoadmap = useCallback(async () => {
+    try {
+      const res = await api.getCurrentRoadmap()
+      if (res.hasRoadmap && res.roadmap) {
+        setActiveRoadmap(res.roadmap)
+      }
+    } catch {
+      // Ignore if unauthenticated or not yet available
+    }
+  }, [])
+
   useEffect(() => {
     loadProfile()
     loadFitOverview()
-  }, [loadProfile, loadFitOverview])
+    loadRoadmap()
+  }, [loadProfile, loadFitOverview, loadRoadmap])
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -86,6 +102,12 @@ export default function AppCheckpoint() {
             PathPilot
           </Link>
           <div className="flex items-center gap-4">
+            <Link
+              to="/roadmap"
+              className="text-body-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+            >
+              My Roadmap
+            </Link>
             <Link
               to="/careers"
               className="text-body-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
@@ -381,6 +403,52 @@ export default function AppCheckpoint() {
                   </div>
                 )}
               </section>
+
+              {/* Phase 7: Roadmap Dashboard Widget */}
+              <Card className="border-border bg-surface">
+                <CardContent className="p-6">
+                  {activeRoadmap ? (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <Badge variant="primary">Active 30-Day Roadmap</Badge>
+                          <Badge variant="neutral">v{activeRoadmap.version}</Badge>
+                        </div>
+                        <h3 className="text-h3 font-semibold text-text-primary">
+                          {activeRoadmap.careerTitle}
+                        </h3>
+                        <p className="mt-1 text-body-sm text-text-secondary">
+                          {activeRoadmap.completedTasks} of {activeRoadmap.totalTasks} tasks completed ({activeRoadmap.progressPercentage.toFixed(1)}%) • {activeRoadmap.weeklyHoursAssumed} hrs/week
+                        </p>
+                      </div>
+                      <Link to="/roadmap" className="shrink-0">
+                        <Button size="md">
+                          Continue Learning Roadmap →
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <Badge variant="neutral">Phase 7: Roadmap & Progress</Badge>
+                        </div>
+                        <h3 className="text-h3 font-semibold text-text-primary">
+                          Personalized 30-Day Learning Roadmap
+                        </h3>
+                        <p className="mt-1 text-body-sm text-text-secondary">
+                          Turn your career fit analysis into an actionable, day-by-day learning plan based on your verified skill gaps.
+                        </p>
+                      </div>
+                      <Link to="/roadmap" className="shrink-0">
+                        <Button size="md">
+                          Generate 30-Day Roadmap →
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Career Explorer Link */}
               <Card className="border-border bg-surface">

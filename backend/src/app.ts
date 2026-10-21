@@ -7,6 +7,7 @@ import { requireAuth } from './middleware/authMiddleware.js'
 import { authRouter } from './routes/authRoutes.js'
 import { careerRouter } from './routes/careerRoutes.js'
 import { profileRouter } from './routes/profileRoutes.js'
+import { roadmapRouter } from './routes/roadmapRoutes.js'
 
 export const app = express()
 
@@ -33,6 +34,9 @@ app.use('/profile', profileRouter)
 
 // Career catalog routes (/careers, /careers/:slug)
 app.use('/careers', careerRouter)
+
+// Roadmap routes (/roadmap/generate, /roadmap/current, /roadmap/regenerate, /roadmap/tasks/:taskId)
+app.use('/roadmap', roadmapRouter)
 
 // Direct /me route support matching root specification
 app.get('/me', requireAuth, getMe)
