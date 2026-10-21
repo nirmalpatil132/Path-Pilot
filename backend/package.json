@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
+    "db:seed": "tsx src/db/seedCareers.ts",
     "test": "vitest run"
   },
   "dependencies": {

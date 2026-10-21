@@ -1,4 +1,5 @@
-import { Badge, Card, CardContent, CardHeader } from '@/components/ui'
+import { Link } from 'react-router-dom'
+import { Badge, Button, Card, CardContent, CardHeader } from '@/components/ui'
 
 interface CareerDemo {
   name: string
@@ -107,10 +108,17 @@ export function CareerPreview() {
           ))}
         </div>
 
-        <p className="mt-8 max-w-2xl text-body-sm text-text-muted">
-          This is a preview of PathPilot's initial career set. Personalized comparison and fit
-          analysis — the full Career Explorer — arrives in a later phase.
-        </p>
+        <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <p className="max-w-xl text-body-sm text-text-muted">
+            This is a preview of PathPilot's initial career set. In Phase 6, comparisons become
+            personalized to your student profile.
+          </p>
+          <Link to="/careers" className="shrink-0">
+            <Button variant="secondary" size="md">
+              Browse Full Career Explorer →
+            </Button>
+          </Link>
+        </div>
       </div>
     </section>
   )

@@ -91,3 +91,35 @@ model ProfileExperience {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 }
+
+model Career {
+  id                 String        @id @default(cuid())
+  slug               String        @unique
+  title              String
+  category           String        // Engineering | Data | Security | Infrastructure | Design
+  summary            String
+  description        String
+  responsibilities   String        // JSON array of strings
+  commonJobTitles    String        // JSON array of strings
+  exampleProjects    String        // JSON array of { title: string, description: string, skills?: string[] }
+  prerequisites      String?       // JSON array of strings
+  relatedCareerSlugs String?       // JSON array of strings (e.g. ["full-stack-developer"])
+  growthPaths        String?       // JSON array of strings
+  interviewAreas     String?       // JSON array of strings
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  skills             CareerSkill[]
+}
+
+model CareerSkill {
+  id          String   @id @default(cuid())
+  careerId    String
+  career      Career   @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  name        String
+  type        String   // "core" | "supporting"
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@unique([careerId, name])
+}

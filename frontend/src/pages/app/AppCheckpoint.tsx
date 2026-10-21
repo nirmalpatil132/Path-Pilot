@@ -66,7 +66,13 @@ export default function AppCheckpoint() {
           >
             PathPilot
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <Link
+              to="/careers"
+              className="text-body-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+            >
+              Explore Careers
+            </Link>
             <span className="hidden text-body-sm text-text-secondary sm:inline-block">
               {user?.email}
             </span>
@@ -238,18 +244,47 @@ export default function AppCheckpoint() {
                 </CardContent>
               </Card>
 
+              {/* Phase 5 Career Explorer Quick Action */}
+              <Card className="border-primary/30 bg-primary/5">
+                <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <span className="text-caption font-semibold uppercase text-primary">
+                      Phase 5 Feature Available
+                    </span>
+                    <h3 className="text-h3 font-semibold text-text-primary mt-1">
+                      Explore 10 Curated Tech Career Paths
+                    </h3>
+                    <p className="mt-1 text-body-sm text-text-secondary">
+                      Discover day-to-day responsibilities, core skills, common entry-level job
+                      titles, and benchmark portfolio projects across engineering, data, security,
+                      infrastructure, and design.
+                    </p>
+                  </div>
+                  <Link to="/careers" className="shrink-0">
+                    <Button size="md">
+                      Open Career Explorer →
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
               {/* Scope Boundary Notification */}
               <div className="rounded-lg border border-dashed border-border bg-surface-muted/30 p-6 text-center">
                 <h4 className="text-h3 text-text-primary">Next: Student Dashboard (Phase 5)</h4>
                 <p className="mx-auto mt-2 max-w-lg text-body-sm text-text-secondary">
-                  You have completed Phase 4 Onboarding. In Phase 5, this route evolves into the full
-                  student dashboard with career exploration, skill-gap analysis, and prioritized
-                  action items.
+                  You can now explore all 10 curated career paths in the Career Explorer. In Phase 6,
+                  PathPilot connects your profile to these careers to calculate deterministic skill
+                  matches and personalized skill-gap roadmaps.
                 </p>
                 <div className="mt-6 flex flex-wrap justify-center gap-4">
-                  <Link to="/">
+                  <Link to="/careers">
                     <Button variant="secondary" size="sm">
-                      Back to Landing Page
+                      Browse Career Catalog
+                    </Button>
+                  </Link>
+                  <Link to="/">
+                    <Button variant="ghost" size="sm">
+                      Landing Page
                     </Button>
                   </Link>
                   <Button variant="ghost" size="sm" onClick={handleLogout}>

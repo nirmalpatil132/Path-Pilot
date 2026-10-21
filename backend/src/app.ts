@@ -5,6 +5,7 @@ import { config } from './config/env.js'
 import { getMe } from './controllers/authController.js'
 import { requireAuth } from './middleware/authMiddleware.js'
 import { authRouter } from './routes/authRoutes.js'
+import { careerRouter } from './routes/careerRoutes.js'
 import { profileRouter } from './routes/profileRoutes.js'
 
 export const app = express()
@@ -29,6 +30,9 @@ app.use('/auth', authRouter)
 
 // Profile routes (/profile, /profile/skills, /profile/experience, /profile/onboarding/complete)
 app.use('/profile', profileRouter)
+
+// Career catalog routes (/careers, /careers/:slug)
+app.use('/careers', careerRouter)
 
 // Direct /me route support matching root specification
 app.get('/me', requireAuth, getMe)

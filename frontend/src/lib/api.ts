@@ -121,6 +121,65 @@ export interface ProfileResponse {
   profile: StudentProfile | null
 }
 
+export interface CareerSummary {
+  id: string
+  slug: string
+  title: string
+  category: string
+  summary: string
+  description: string
+  coreSkills: string[]
+  supportingSkills: string[]
+  commonJobTitles: string[]
+  exampleProjectsCount: number
+}
+
+export interface CareerSkillItem {
+  name: string
+  description?: string | null
+}
+
+export interface ExampleProject {
+  title: string
+  description: string
+  skills?: string[]
+}
+
+export interface RelatedCareerPreview {
+  slug: string
+  title: string
+  category: string
+  summary: string
+}
+
+export interface CareerDetail {
+  id: string
+  slug: string
+  title: string
+  category: string
+  summary: string
+  description: string
+  responsibilities: string[]
+  coreSkills: CareerSkillItem[]
+  supportingSkills: CareerSkillItem[]
+  commonJobTitles: string[]
+  exampleProjects: ExampleProject[]
+  prerequisites: string[]
+  relatedCareers: RelatedCareerPreview[]
+  growthPaths: string[]
+  interviewAreas: string[]
+}
+
+export interface CareersResponse {
+  careers: CareerSummary[]
+  categories: string[]
+  total: number
+}
+
+export interface CareerDetailResponse {
+  career: CareerDetail
+}
+
 export const api = {
   register: (data: { name: string; email: string; password: string }) =>
     request<AuthResponse>('/auth/register', {
@@ -165,4 +224,19 @@ export const api = {
     request<{ message: string; profile: StudentProfile }>('/profile/onboarding/complete', {
       method: 'PUT',
     }),
+
+  getCareers: (params?: { search?: string; category?: string }) => {
+    const searchParams = new URLSearchParams()
+    if (params?.search && params.search.trim() !== '') {
+      searchParams.set('search', params.search.trim())
+    }
+    if (params?.category && params.category !== 'All' && params.category.trim() !== '') {
+      searchParams.set('category', params.category.trim())
+    }
+    const queryString = searchParams.toString()
+    return request<CareersResponse>(`/careers${queryString ? `?${queryString}` : ''}`)
+  },
+
+  getCareerBySlug: (slug: string) =>
+    request<CareerDetailResponse>(`/careers/${encodeURIComponent(slug)}`),
 }

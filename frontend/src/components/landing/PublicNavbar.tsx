@@ -1,13 +1,7 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui'
 import { useAuth } from '@/context'
 import { NavbarShell } from '@/layouts/NavbarShell'
-
-const navLinks = [
-  { id: 'how-it-works', label: 'How It Works' },
-  { id: 'careers', label: 'Explore Careers' },
-  { id: 'explainable-fit', label: 'Why PathPilot' },
-]
 
 /**
  * Public landing-page navigation with authentication awareness.
@@ -16,11 +10,13 @@ const navLinks = [
  */
 export function PublicNavbar() {
   const { user } = useAuth()
+  const location = useLocation()
+  const isHomePage = location.pathname === '/'
 
   return (
     <NavbarShell
       brand={
-        <Link to="/" className="text-text-primary hover:opacity-90">
+        <Link to="/" className="text-text-primary hover:opacity-90 font-bold">
           PathPilot
         </Link>
       }
@@ -49,15 +45,24 @@ export function PublicNavbar() {
         )
       }
     >
-      {navLinks.map((link) => (
-        <a
-          key={link.id}
-          href={`#${link.id}`}
-          className="text-body-sm text-text-secondary transition-colors hover:text-text-primary"
-        >
-          {link.label}
-        </a>
-      ))}
+      <a
+        href={isHomePage ? '#how-it-works' : '/#how-it-works'}
+        className="text-body-sm text-text-secondary transition-colors hover:text-text-primary"
+      >
+        How It Works
+      </a>
+      <Link
+        to="/careers"
+        className="text-body-sm text-text-secondary transition-colors hover:text-text-primary font-medium"
+      >
+        Explore Careers
+      </Link>
+      <a
+        href={isHomePage ? '#explainable-fit' : '/#explainable-fit'}
+        className="text-body-sm text-text-secondary transition-colors hover:text-text-primary"
+      >
+        Why PathPilot
+      </a>
     </NavbarShell>
   )
 }
