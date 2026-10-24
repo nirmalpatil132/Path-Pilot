@@ -395,6 +395,71 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  // Phase 08: Project-Based Learning & Portfolio Evidence
+  getProjects: (status?: string) =>
+    request<{ projects: Project[] }>(
+      status && status !== 'ALL' ? `/projects?status=${encodeURIComponent(status)}` : '/projects',
+    ),
+
+  getProjectRecommendations: (career?: string) =>
+    request<ProjectRecommendationsResponse>(
+      career ? `/projects/recommendations?career=${encodeURIComponent(career)}` : '/projects/recommendations',
+    ),
+
+  getProjectTemplates: (career?: string) =>
+    request<{ templates: CatalogProjectTemplate[] }>(
+      career ? `/projects/templates?career=${encodeURIComponent(career)}` : '/projects/templates',
+    ),
+
+  getProjectMetrics: () =>
+    request<{ metrics: ProjectSummaryMetrics }>('/projects/metrics'),
+
+  getProjectById: (id: string) =>
+    request<{ project: Project }>(`/projects/${encodeURIComponent(id)}`),
+
+  createProject: (data: CreateProjectPayload) =>
+    request<{ message: string; project: Project }>('/projects', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateProject: (id: string, data: UpdateProjectPayload) =>
+    request<{ message: string; project: Project }>(`/projects/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  deleteProject: (id: string) =>
+    request<{ message: string }>(`/projects/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
+
+  addDeliverable: (projectId: string, data: CreateDeliverablePayload) =>
+    request<{ message: string; deliverable: ProjectDeliverable }>(
+      `/projects/${encodeURIComponent(projectId)}/evidence`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+    ),
+
+  updateDeliverable: (projectId: string, evidenceId: string, data: UpdateDeliverablePayload) =>
+    request<{ message: string; deliverable: ProjectDeliverable }>(
+      `/projects/${encodeURIComponent(projectId)}/evidence/${encodeURIComponent(evidenceId)}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      },
+    ),
+
+  deleteDeliverable: (projectId: string, evidenceId: string) =>
+    request<{ message: string }>(
+      `/projects/${encodeURIComponent(projectId)}/evidence/${encodeURIComponent(evidenceId)}`,
+      {
+        method: 'DELETE',
+      },
+    ),
 }
 
 export type RoadmapTaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'BLOCKED'
@@ -463,4 +528,147 @@ export interface Roadmap {
 export interface CurrentRoadmapResponse {
   hasRoadmap: boolean
   roadmap: Roadmap | null
+}
+
+// ==========================================
+// Phase 08: Project & Deliverable Types
+// ==========================================
+
+export type ProjectStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'ARCHIVED'
+
+export type DeliverableType =
+  | 'FEATURE_MODULE'
+  | 'CODE_REPOSITORY'
+  | 'DEPLOYED_DEMO'
+  | 'TEST_SUITE'
+  | 'DESIGN_PROTOTYPE'
+  | 'TECHNICAL_DOCS'
+  | 'IMPLEMENTATION_NOTE'
+
+export type DeliverableStatus = 'PLANNED' | 'SUBMITTED'
+
+export interface ProjectDeliverable {
+  id: string
+  projectId: string
+  title: string
+  description: string
+  type: DeliverableType
+  status: DeliverableStatus
+  url: string | null
+  roadmapTaskId: string | null
+  roadmapTaskTitle?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Project {
+  id: string
+  userId: string
+  title: string
+  description: string
+  source: 'TEMPLATE' | 'CUSTOM'
+  templateId: string | null
+  careerId: string | null
+  careerSlug: string | null
+  careerTitle: string | null
+  skills: string[]
+  status: ProjectStatus
+  startDate: string | null
+  completionDate: string | null
+  repositoryUrl: string | null
+  liveDemoUrl: string | null
+  notes: string | null
+  createdAt: string
+  updatedAt: string
+  deliverablesCount: number
+  deliverables?: ProjectDeliverable[]
+}
+
+export interface CatalogProjectTemplate {
+  templateId: string
+  title: string
+  description: string
+  skills: string[]
+  careerSlug: string
+  careerTitle: string
+  careerCategory: string
+}
+
+export interface ProjectRecommendation {
+  templateId: string
+  title: string
+  description: string
+  skills: string[]
+  careerSlug: string
+  careerTitle: string
+  careerCategory: string
+  priority: 'HIGH' | 'RECOMMENDED' | 'ELECTIVE'
+  matchScore: number
+  reasons: string[]
+  matchedCriticalSkills: string[]
+  matchedRecommendedSkills: string[]
+  matchedOptionalSkills: string[]
+  allMatchedSkills: string[]
+  isAlreadyStarted: boolean
+  existingProjectStatus?: string | null
+}
+
+export interface ProjectRecommendationsResponse {
+  targetCareerSlug: string | null
+  totalRecommendations: number
+  recommendations: ProjectRecommendation[]
+}
+
+export interface ProjectSummaryMetrics {
+  totalProjects: number
+  activeProjects: number
+  plannedProjects: number
+  completedProjects: number
+  archivedProjects: number
+  totalDeliverables: number
+}
+
+export interface CreateProjectPayload {
+  title: string
+  description?: string
+  source?: 'TEMPLATE' | 'CUSTOM'
+  templateId?: string | null
+  careerSlug?: string | null
+  careerTitle?: string | null
+  skills?: string[]
+  status?: ProjectStatus
+  startDate?: string | null
+  completionDate?: string | null
+  repositoryUrl?: string | null
+  liveDemoUrl?: string | null
+  notes?: string | null
+}
+
+export interface UpdateProjectPayload {
+  title?: string
+  description?: string
+  skills?: string[]
+  status?: ProjectStatus
+  startDate?: string | null
+  completionDate?: string | null
+  repositoryUrl?: string | null
+  liveDemoUrl?: string | null
+  notes?: string | null
+}
+
+export interface CreateDeliverablePayload {
+  title: string
+  description?: string
+  type?: DeliverableType
+  status?: DeliverableStatus
+  url?: string | null
+  roadmapTaskId?: string | null
+}
+
+export interface UpdateDeliverablePayload {
+  title?: string
+  description?: string
+  type?: DeliverableType
+  status?: DeliverableStatus
+  url?: string | null
 }

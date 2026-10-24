@@ -8,6 +8,7 @@ import { authRouter } from './routes/authRoutes.js'
 import { careerRouter } from './routes/careerRoutes.js'
 import { profileRouter } from './routes/profileRoutes.js'
 import { roadmapRouter } from './routes/roadmapRoutes.js'
+import { projectRouter } from './routes/projectRoutes.js'
 
 export const app = express()
 
@@ -37,6 +38,9 @@ app.use('/careers', careerRouter)
 
 // Roadmap routes (/roadmap/generate, /roadmap/current, /roadmap/regenerate, /roadmap/tasks/:taskId)
 app.use('/roadmap', roadmapRouter)
+
+// Project workspace routes (/projects, /projects/recommendations, /projects/:id)
+app.use('/projects', projectRouter)
 
 // Direct /me route support matching root specification
 app.get('/me', requireAuth, getMe)

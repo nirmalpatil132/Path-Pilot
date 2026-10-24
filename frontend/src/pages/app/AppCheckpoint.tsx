@@ -5,6 +5,7 @@ import { useAuth } from '@/context'
 import {
   api,
   type CareerFitOverviewResponse,
+  type ProjectSummaryMetrics,
   type Roadmap,
   type StudentProfile,
 } from '@/lib/api'
@@ -27,6 +28,9 @@ export default function AppCheckpoint() {
 
   // Phase 7: Roadmap State
   const [activeRoadmap, setActiveRoadmap] = useState<Roadmap | null>(null)
+
+  // Phase 8: Project Metrics State
+  const [projectMetrics, setProjectMetrics] = useState<ProjectSummaryMetrics | null>(null)
 
   const loadProfile = useCallback(async () => {
     try {
@@ -63,11 +67,21 @@ export default function AppCheckpoint() {
     }
   }, [])
 
+  const loadProjectMetrics = useCallback(async () => {
+    try {
+      const res = await api.getProjectMetrics()
+      setProjectMetrics(res.metrics)
+    } catch {
+      // Ignore if unauthenticated or not yet available
+    }
+  }, [])
+
   useEffect(() => {
     loadProfile()
     loadFitOverview()
     loadRoadmap()
-  }, [loadProfile, loadFitOverview, loadRoadmap])
+    loadProjectMetrics()
+  }, [loadProfile, loadFitOverview, loadRoadmap, loadProjectMetrics])
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -107,6 +121,12 @@ export default function AppCheckpoint() {
               className="text-body-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
             >
               My Roadmap
+            </Link>
+            <Link
+              to="/projects"
+              className="text-body-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+            >
+              Projects
             </Link>
             <Link
               to="/careers"
@@ -443,6 +463,66 @@ export default function AppCheckpoint() {
                       <Link to="/roadmap" className="shrink-0">
                         <Button size="md">
                           Generate 30-Day Roadmap →
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* ========================================================= */}
+              {/* PHASE 8: PROJECT WORKSPACE & PORTFOLIO EVIDENCE          */}
+              {/* ========================================================= */}
+              <Card className="border-border bg-surface">
+                <CardHeader className="border-b border-border p-6">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-h3 font-bold text-text-primary">
+                          Project-Based Learning & Evidence
+                        </h3>
+                        <Badge variant="primary">Phase 08</Badge>
+                      </div>
+                      <p className="mt-1 text-body-sm text-text-secondary">
+                        Translate roadmap tasks into verifiable portfolio projects, code repositories, and working demos.
+                      </p>
+                    </div>
+
+                    <Link to="/projects" className="shrink-0">
+                      <Button variant="primary" size="md">
+                        Open Project Workspace →
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {projectMetrics && projectMetrics.totalProjects > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div className="rounded-lg bg-surface-raised p-4 border border-border">
+                        <span className="text-xs text-text-muted block mb-1">Total Projects</span>
+                        <span className="text-h3 font-bold text-text-primary">{projectMetrics.totalProjects}</span>
+                      </div>
+                      <div className="rounded-lg bg-surface-raised p-4 border border-border">
+                        <span className="text-xs text-text-muted block mb-1">In Progress</span>
+                        <span className="text-h3 font-bold text-primary">{projectMetrics.activeProjects}</span>
+                      </div>
+                      <div className="rounded-lg bg-surface-raised p-4 border border-border">
+                        <span className="text-xs text-text-muted block mb-1">Completed</span>
+                        <span className="text-h3 font-bold text-success">{projectMetrics.completedProjects}</span>
+                      </div>
+                      <div className="rounded-lg bg-surface-raised p-4 border border-border">
+                        <span className="text-xs text-text-muted block mb-1">Deliverables Added</span>
+                        <span className="text-h3 font-bold text-text-primary">{projectMetrics.totalDeliverables}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <p className="text-body-sm text-text-secondary">
+                        You haven't started a project yet. Explore curated project ideas matched to your skill gaps.
+                      </p>
+                      <Link to="/projects">
+                        <Button variant="secondary" size="sm">
+                          Discover Recommended Projects →
                         </Button>
                       </Link>
                     </div>

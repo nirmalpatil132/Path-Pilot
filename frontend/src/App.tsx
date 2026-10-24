@@ -12,6 +12,8 @@ import StyleGuide from './pages/dev/StyleGuide'
 import Landing from './pages/Landing'
 import OnboardingWizard from './pages/onboarding/OnboardingWizard'
 import RoadmapPage from './pages/roadmap/RoadmapPage'
+import ProjectsPage from './pages/projects/ProjectsPage'
+import ProjectDetailPage from './pages/projects/ProjectDetailPage'
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<AppCheckpoint />} />
           <Route path="/roadmap" element={<RoadmapPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/projects/:id" element={<ProjectDetailPage />} />
           <Route path="/onboarding" element={<OnboardingWizard />} />
         </Route>
       </Routes>

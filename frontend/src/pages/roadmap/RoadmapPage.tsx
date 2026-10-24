@@ -162,6 +162,12 @@ export default function RoadmapPage() {
                 My Roadmap
               </span>
               <Link
+                to="/projects"
+                className="text-text-secondary hover:text-text-primary transition-colors font-medium"
+              >
+                Projects
+              </Link>
+              <Link
                 to="/careers"
                 className="text-text-secondary hover:text-text-primary transition-colors font-medium"
               >

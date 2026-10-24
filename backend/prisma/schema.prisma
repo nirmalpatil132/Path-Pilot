@@ -17,6 +17,7 @@ model User {
   sessions     Session[]
   profile      StudentProfile?
   roadmaps     Roadmap[]
+  projects     Project[]
 }
 
 model Session {
@@ -112,6 +113,7 @@ model Career {
 
   skills             CareerSkill[]
   roadmaps           Roadmap[]
+  projects           Project[]
 }
 
 model CareerSkill {
@@ -176,5 +178,53 @@ model RoadmapTask {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
+  deliverables       ProjectDeliverable[]
+
   @@index([roadmapId, weekNumber])
+}
+
+model Project {
+  id             String               @id @default(cuid())
+  userId         String
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  source         String               @default("CUSTOM") // "TEMPLATE" | "CUSTOM"
+  templateId     String?
+  careerId       String?
+  career         Career?              @relation(fields: [careerId], references: [id], onDelete: SetNull)
+  careerSlug     String?
+  careerTitle    String?
+  skills         String               // JSON array of strings e.g. ["React", "TypeScript"]
+  status         String               @default("PLANNED") // "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "ARCHIVED"
+  startDate      String?
+  completionDate String?
+  repositoryUrl  String?
+  liveDemoUrl    String?
+  notes          String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  deliverables   ProjectDeliverable[]
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([careerId])
+}
+
+model ProjectDeliverable {
+  id            String       @id @default(cuid())
+  projectId     String
+  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title         String
+  description   String
+  type          String       @default("FEATURE_MODULE") // "FEATURE_MODULE" | "CODE_REPOSITORY" | "DEPLOYED_DEMO" | "TEST_SUITE" | "DESIGN_PROTOTYPE" | "TECHNICAL_DOCS" | "IMPLEMENTATION_NOTE"
+  status        String       @default("SUBMITTED") // "PLANNED" | "SUBMITTED"
+  url           String?
+  roadmapTaskId String?
+  roadmapTask   RoadmapTask? @relation(fields: [roadmapTaskId], references: [id], onDelete: SetNull)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([projectId])
 }
